@@ -282,13 +282,13 @@
       if (i === 0) return '<th class="stick">' + esc(grp.label) + '</th><th style="border-left:0"></th>';
       var kind = grp.kind ? ' <span class="t-faint normal-case tracking-normal font-mono">· ' + (grp.kind === 'date' ? 'dias' : grp.kind === 'code' ? 'código' : 'valor') + '</span>' : '';
       return '<th colspan="' + grp.span + '" class="first-of-group">' + esc(grp.label) + kind + '</th>';
-    }).join('') + '<th class="status-col" rowspan="1">Status</th></tr>';
+    }).join('') + '<th class="first-of-group">Observação</th><th class="status-col" rowspan="1">Status</th></tr>';
 
     var c = '<tr class="c">' + d.columns.map(function (col, i) {
       var cls = 'src-' + col.src + (i === 0 ? ' stick' : '') + (i > 1 && col.src === 'TRD' ? ' first-of-group' : '') + (i === 1 ? '' : '');
       var srcLabel = col.src === 'DIF' ? 'TRD − PTP (' + col.letter + ')' : col.src + ' · col ' + col.letter;
       return '<th class="' + cls + '"><span class="src">' + srcLabel + '</span><span class="letter">' + col.out + '</span>' + esc(col.label) + '</th>';
-    }).join('') + '<th class="status-col"><span class="src t-faint">batimento</span>status</th></tr>';
+    }).join('') + '<th class="first-of-group"><span class="src t-faint">data</span>observacao</th><th class="status-col"><span class="src t-faint">batimento</span>status</th></tr>';
     return g + c;
   }
 
@@ -310,11 +310,18 @@
     }
     if (col.kind === 'id') cls.push('id');
     if (col.src === 'DIF' && r.divs.indexOf(col.key) >= 0) cls.push('bad');
+    else if (col.src === 'DIF' && typeof v === 'number' && v !== 0) cls.push('tol');
     if (r.status === 'Allege on PTP side' && col.src === 'PTP') cls.push('side-missing');
     if (r.status === 'Allege on TRD side' && col.src === 'TRD') cls.push('side-missing');
     if (col.src === 'TRD' && col.group > 0) cls.push('first-of-group');
     if (col.key === 'id_trd') cls.push('stick');
     return '<td class="' + cls.join(' ') + '">' + esc(txt) + '</td>';
+  }
+
+  function obsCell(r) {
+    return r.observacao
+      ? '<td class="obs first-of-group">' + esc(r.observacao) + '</td>'
+      : '<td class="empty first-of-group">—</td>';
   }
 
   function statusCell(r) {
@@ -351,11 +358,11 @@
     var slice = rows.slice(start, start + state.pageSize);
 
     if (!slice.length) {
-      table.tBodies[0].innerHTML = '<tr><td colspan="' + (d.columns.length + 1) + '" class="empty"><div class="py-10 text-center t-faint">Nenhum instrumento neste filtro.</div></td></tr>';
+      table.tBodies[0].innerHTML = '<tr><td colspan="' + (d.columns.length + 2) + '" class="empty"><div class="py-10 text-center t-faint">Nenhum instrumento neste filtro.</div></td></tr>';
     } else {
       table.tBodies[0].innerHTML = slice.map(function (r) {
         var cls = r.status !== 'Match' ? 'allege' : (r.divs.length ? 'div' : '');
-        return '<tr class="' + cls + '">' + d.columns.map(function (col) { return fmtCell(col, r[col.key], r); }).join('') + statusCell(r) + '</tr>';
+        return '<tr class="' + cls + '">' + d.columns.map(function (col) { return fmtCell(col, r[col.key], r); }).join('') + obsCell(r) + statusCell(r) + '</tr>';
       }).join('');
     }
 

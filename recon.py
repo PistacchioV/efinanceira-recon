@@ -7,6 +7,9 @@ Regras:
   * Instrumento so no TRD  -> "Allege on PTP side" (falta do lado PTP).
     Instrumento so no PTP  -> "Allege on TRD side" (falta do lado TRD).
   * Subtracoes (TRD - PTP): N-B, P-C, Q-D, T-E, U-F, V-G.
+  * Tolerancias: data (conta_dtencerr) ate 3 dias; demais diferencas ate 0,5.
+    Diferenca de data dentro da tolerancia gera a observacao
+    "Gap between fixing and maturity date".
   * Nome de coluna = nome original + "_TRD" / "_PTP".
 """
 
@@ -42,7 +45,10 @@ VAL_OK = "OK"
 VAL_DIV = "Divergente"
 TXT_DIVERGENTE = "DIVERGENTE"
 
-TOLERANCIA = 0.005
+TOLERANCIA = 0.005      # ruido de ponto flutuante: abaixo disso a diferenca vira zero
+TOL_DIAS = 3            # coluna de data: |dif| <= 3 dias nao diverge
+TOL_VALOR = 0.5         # demais colunas: |dif| <= 0,5 nao diverge
+OBS_GAP_DATA = "Gap between fixing and maturity date"
 FILE_RE = re.compile(r"(\d{4})\s*[_\-\s]\s*(TRD|PTP)", re.IGNORECASE)
 EXCEL_EPOCH = datetime(1899, 12, 30)
 
@@ -151,7 +157,7 @@ def compare(kind, a, b):
         if da is None or db is None:
             return TXT_DIVERGENTE, True
         d = (da - db).days
-        return d, d != 0
+        return d, abs(d) > TOL_DIAS
 
     if kind == "number":
         na, nb = to_number(a), to_number(b)
@@ -161,14 +167,14 @@ def compare(kind, a, b):
             d = round((na or 0.0) - (nb or 0.0), 6)
             if abs(d) < TOLERANCIA:
                 d = 0.0
-            return d, d != 0
+            return d, abs(d) > TOL_VALOR + 1e-9
         return compare("code", a, b)
 
     # code
     na, nb = to_number(a), to_number(b)
     if na is not None and nb is not None:
         d = round(na - nb, 6)
-        return d, abs(d) >= TOLERANCIA
+        return d, abs(d) > TOL_VALOR + 1e-9
     if to_code(a) == to_code(b):
         return (None, False) if is_blank(a) and is_blank(b) else (0, False)
     return TXT_DIVERGENTE, True
@@ -332,7 +338,7 @@ def reconcile(trd_file, ptp_file):
         rec = {"key": key}
         rec["id_trd"] = clean_display(cell(rt, TRD_ID_COL)) if rt else None
         rec["id_ptp"] = clean_display(cell(rp, PTP_ID_COL)) if rp else None
-        divs = []
+        divs, obs = [], []
         for gi, (lt, lp, kind) in enumerate(PAIRS, start=1):
             vt = clean_display(cell(rt, lt)) if rt else None
             vp = clean_display(cell(rp, lp)) if rp else None
@@ -349,6 +355,8 @@ def reconcile(trd_file, ptp_file):
                 rec["d%d" % gi] = d
                 if is_div:
                     divs.append("d%d" % gi)
+                elif kind == "date" and isinstance(d, int) and d != 0 and OBS_GAP_DATA not in obs:
+                    obs.append(OBS_GAP_DATA)
             else:
                 rec["d%d" % gi] = None
         if rt is not None and rp is not None:
@@ -361,6 +369,7 @@ def reconcile(trd_file, ptp_file):
             rec["status"] = STATUS_ALLEGE_TRD
             rec["valores"] = "-"
         rec["divs"] = divs
+        rec["observacao"] = "; ".join(obs) or None
         return rec
 
     for k in trd_order:
@@ -393,6 +402,9 @@ def reconcile(trd_file, ptp_file):
         "allege_ptp": sum(1 for r in out if r["status"] == STATUS_ALLEGE_PTP),
         "allege_trd": sum(1 for r in out if r["status"] == STATUS_ALLEGE_TRD),
         "div_por_campo": div_por_campo,
+        "gap_data": sum(1 for r in out if r["observacao"]),
+        "tol_dias": TOL_DIAS,
+        "tol_valor": TOL_VALOR,
         "gerado_em": datetime.now().strftime("%d/%m/%Y %H:%M:%S"),
     }
     return {"columns": columns, "groups": groups, "rows": out, "summary": summary, "warnings": warnings}
@@ -444,7 +456,7 @@ def to_excel(result):
     ws = wb.active
     ws.title = "Recon"
 
-    extra = [("status_batimento", "status"), ("status_valores", "valores")]
+    extra = [("status_batimento", "status"), ("status_valores", "valores"), ("observacao", "observacao")]
     headers = [c["label"] for c in cols] + [h for h, _ in extra]
 
     for j, h in enumerate(headers, start=1):
@@ -486,6 +498,8 @@ def to_excel(result):
             elif key == "valores" and r[key] == VAL_DIV:
                 c.fill = FILL_BAD
                 c.font = Font(bold=True, color="B3261E")
+            elif key == "observacao" and r[key]:
+                c.fill = FILL_ALLEGE
 
     widths = {"id": 18, "date": 14, "number": 16, "code": 12}
     for j, col in enumerate(cols, start=1):
@@ -493,6 +507,7 @@ def to_excel(result):
         ws.column_dimensions[get_column_letter(j)].width = w
     ws.column_dimensions[get_column_letter(len(cols) + 1)].width = 22
     ws.column_dimensions[get_column_letter(len(cols) + 2)].width = 16
+    ws.column_dimensions[get_column_letter(len(cols) + 3)].width = 38
     ws.freeze_panes = "C2"
     ws.auto_filter.ref = "A1:%s%d" % (get_column_letter(len(headers)), max(1, len(result["rows"]) + 1))
 
@@ -512,6 +527,8 @@ def to_excel(result):
         ("  com divergencia", s["divergentes"]),
         ("Allege on PTP side (so no TRD)", s["allege_ptp"]),
         ("Allege on TRD side (so no PTP)", s["allege_trd"]),
+        ("Gap between fixing and maturity date", s["gap_data"]),
+        ("Tolerancias", "data <= %d dias; demais diferencas <= %s" % (s["tol_dias"], str(s["tol_valor"]).replace(".", ","))),
         ("", ""),
         ("Divergencias por campo", ""),
     ] + [("  " + k, v) for k, v in s["div_por_campo"].items()]
@@ -521,7 +538,7 @@ def to_excel(result):
         rs.cell(row=i, column=1, value=k)
         rs.cell(row=i, column=2, value=v)
     rs["A1"].font = Font(bold=True, size=14, color=INK)
-    for ref in ("A15",):
+    for ref in ("A17",):
         rs[ref].font = Font(bold=True)
     rs.column_dimensions["A"].width = 36
     rs.column_dimensions["B"].width = 60
