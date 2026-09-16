@@ -43,7 +43,7 @@
 
   <!-- navbar -->
   <nav class="nav">
-    <div class="w-full px-4 md:px-5 h-16 flex items-center justify-between relative">
+    <div class="shell px-4 md:px-5 h-16 flex items-center justify-between relative">
       <a class="flex items-center gap-2.5 group animate-blur-in stagger-1" href="/">
         <img src="{{ url_for('static', filename='img/logo.svg') }}" alt="" class="w-7 h-7 group-hover:scale-110 transition-transform"/>
         <span class="text-sm tracking-tight font-medium t-fg">e-Financeira <span class="t-accent">Recon</span></span>
@@ -67,7 +67,7 @@
     </div>
   </nav>
 
-  <main class="flex-1 w-full relative z-10">
+  <main class="shell flex-1 relative z-10">
 
     <!-- hero -->
     <section class="w-full border-b b-line pt-16 md:pt-20 pb-12 px-4 md:px-5 relative overflow-hidden">
@@ -262,7 +262,7 @@
     </section>
   </main>
 
-  <footer class="relative z-10 w-full px-4 md:px-5 py-6 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs t-faint">
+  <footer class="shell relative z-10 px-4 md:px-5 py-6 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs t-faint">
     <div class="flex items-center gap-2"><img src="{{ url_for('static', filename='img/logo.svg') }}" alt="" class="w-4 h-4"/>e-Financeira Recon</div>
     <div>Processamento em memória · nada é gravado em disco</div>
   </footer>
