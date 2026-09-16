@@ -1,0 +1,38 @@
+/* base.css — global tipografia, reset e tokens da página (extraído de src/index.css) */
+
+html {
+  font-family: 'Inter', system-ui, sans-serif;
+  color-scheme: dark;
+  background-color: #05080A;
+}
+
+body {
+  background-color: #05080A;
+  color: #ffffff;
+  overflow-x: hidden;
+  margin: 0;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* a fonte "geist" do template original cai para Inter */
+.font-geist {
+  font-family: 'Inter', system-ui, sans-serif;
+}
+
+.text-balance {
+  text-wrap: balance;
+}
+
+.text-pretty {
+  text-wrap: pretty;
+}
+
+/* esconde a scrollbar para componentes com rolagem interna */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}

@@ -1,0 +1,277 @@
+<!doctype html>
+<html lang="pt-BR" class="dark">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>e-Financeira Recon | Batimento TRD × PTP</title>
+<meta name="description" content="Batimento e-Financeira: reconciliação de instrumentos e valores entre os arquivos MMAA_TRD e MMAA_PTP."/>
+<meta name="theme-color" content="#05080A"/>
+
+<!-- tema salvo antes de pintar, para nao piscar -->
+<script>
+  (function () {
+    var t = 'dark';
+    try { t = localStorage.getItem('efin-theme') || 'dark'; } catch (e) {}
+    var h = document.documentElement;
+    h.classList.remove('dark', 'light');
+    h.classList.add(t);
+  })();
+</script>
+
+<link rel="icon" href="{{ url_for('favicon') }}" sizes="any"/>
+<link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='img/logo.svg') }}"/>
+<link rel="apple-touch-icon" href="{{ url_for('static', filename='img/logo-512.png') }}"/>
+
+<!-- fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+
+<!-- css do design system + tokens/tema da ferramenta -->
+<link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}"/>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/effects.css') }}"/>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}"/>
+
+<!-- Tailwind (copia local do CDN, funciona offline); config antes do runtime -->
+<script src="{{ url_for('static', filename='js/tailwind-config.js') }}"></script>
+<script src="{{ url_for('static', filename='vendor/tailwindcss.js') }}"></script>
+</head>
+<body class="antialiased">
+
+<div class="min-h-screen flex flex-col relative overflow-hidden w-full font-geist">
+  <div class="frame-lines hidden md:block"></div>
+
+  <!-- navbar -->
+  <nav class="nav">
+    <div class="max-w-[1360px] mx-auto w-full px-6 h-16 flex items-center justify-between relative">
+      <a class="flex items-center gap-2.5 group animate-blur-in stagger-1" href="/">
+        <img src="{{ url_for('static', filename='img/logo.svg') }}" alt="" class="w-7 h-7 group-hover:scale-110 transition-transform"/>
+        <span class="text-sm tracking-tight font-medium t-fg">e-Financeira <span class="t-accent">Recon</span></span>
+      </a>
+      <div class="flex items-center gap-4 lg:gap-6">
+        <a class="hidden sm:block text-xs tracking-tight t-muted hover:opacity-100 animate-blur-in stagger-2" href="#importar">Importar</a>
+        <a class="hidden sm:block text-xs tracking-tight t-muted animate-blur-in stagger-3" href="#analise">Análise</a>
+        <a class="hidden md:block text-xs tracking-tight t-muted animate-blur-in stagger-4" href="#regras">Regras</a>
+        <button id="themeToggle" class="theme-toggle animate-blur-in stagger-5" aria-label="Alternar tema claro/escuro" title="Alternar tema">
+          <span class="knob"></span>
+          <span class="ico ico-moon">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+          </span>
+          <span class="ico ico-sun">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2m-7.07-2.93 1.41-1.41m11.32-11.32 1.41-1.41M2 12h2m16 0h2M4.93 4.93l1.41 1.41m11.32 11.32 1.41 1.41"/></svg>
+          </span>
+        </button>
+      </div>
+      <div class="nav-dot -left-[2px]"></div>
+      <div class="nav-dot -right-[2px]"></div>
+    </div>
+  </nav>
+
+  <main class="flex-1 max-w-[1360px] mx-auto w-full relative z-10">
+
+    <!-- hero -->
+    <section class="w-full border-b b-line pt-16 md:pt-20 pb-12 px-6 relative overflow-hidden">
+      <div class="glow-top"></div>
+      <div class="relative z-10 flex flex-col md:flex-row w-full justify-between max-w-6xl mx-auto gap-10 md:items-end">
+        <div class="flex flex-col items-start w-full md:w-3/5">
+          <div class="hero-anim-item pill mb-6"><span class="pulse-dot"></span>Batimento MMAA_TRD × MMAA_PTP</div>
+          <h1 class="hero-anim-item text-4xl md:text-6xl t-fg font-light tracking-tighter text-balance">
+            Reconciliação <br class="hidden md:block"/><span class="title-gradient font-light tracking-tighter">e-Financeira.</span>
+          </h1>
+        </div>
+        <div class="flex flex-col items-start md:items-end w-full md:w-2/5 md:text-right">
+          <p class="hero-anim-item t-muted text-base max-w-md text-pretty tracking-tight">
+            Solte os dois arquivos, cruze os instrumentos pelo miolo numérico do ID e veja, campo a campo, a diferença entre TRD e PTP. Exporte a análise em Excel.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- etapa 01: importar -->
+    <section id="importar" class="w-full border-b b-line">
+      <div class="grid lg:grid-cols-[1.15fr_0.85fr]">
+        <div class="panel panel-hoverglow border-0 lg:border-r b-line p-6 md:p-8">
+          <div class="relative mb-6 flex items-start gap-5">
+            <div class="step-tag">Etapa 01</div>
+            <div>
+              <h2 class="text-2xl font-light tracking-tight t-fg">Importar arquivos</h2>
+              <p class="mt-2 max-w-md text-sm leading-relaxed tracking-tight t-muted">Arraste o MMAA_TRD e o MMAA_PTP juntos ou um de cada vez. O lado de cada arquivo é reconhecido pelo nome e, na falta dele, pelo conteúdo.</p>
+            </div>
+          </div>
+
+          <div id="dropzone" class="dropzone relative" tabindex="0" role="button" aria-label="Solte os arquivos aqui ou clique para procurar">
+            <svg class="mb-4 h-12 w-12 t-accent" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 13v8"/><path d="M4 14.9A7 7 0 1 1 15.7 8h1.8a4.5 4.5 0 0 1 2.5 8.2"/><path d="m8 17 4-4 4 4"/></svg>
+            <div class="text-sm font-mono t-fg2">Solte os arquivos aqui</div>
+            <div class="mt-1 text-xs tracking-tight t-faint">ou clique para procurar</div>
+            <div class="mt-5 flex flex-wrap justify-center gap-2">
+              <span class="chip-ext">.xlsx</span><span class="chip-ext">.xlsm</span><span class="chip-ext">MMAA_TRD</span><span class="chip-ext">MMAA_PTP</span>
+            </div>
+            <input id="fileInput" type="file" accept=".xlsx,.xlsm" multiple class="hidden"/>
+          </div>
+        </div>
+
+        <div class="panel border-0 p-6 md:p-8 flex flex-col" style="background: var(--panel-solid)">
+          <div class="mb-4 text-xs font-mono tracking-widest t-fg3 uppercase">Arquivos selecionados</div>
+          <div class="flex flex-col gap-3">
+            <div class="slot" id="slot-TRD">
+              <div class="slot-ico">TRD</div>
+              <div class="min-w-0 flex-1">
+                <div class="text-sm font-mono t-fg2 truncate" data-name>Aguardando MMAA_TRD</div>
+                <div class="text-xs tracking-tight t-faint truncate" data-meta>coluna J · INOA-XXXXXXXXXX</div>
+              </div>
+              <button class="icon-btn hidden-soft" data-clear="TRD" aria-label="Remover arquivo TRD">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+              </button>
+            </div>
+            <div class="slot" id="slot-PTP">
+              <div class="slot-ico">PTP</div>
+              <div class="min-w-0 flex-1">
+                <div class="text-sm font-mono t-fg2 truncate" data-name>Aguardando MMAA_PTP</div>
+                <div class="text-xs tracking-tight t-faint truncate" data-meta>coluna A · instrument_id</div>
+              </div>
+              <button class="icon-btn hidden-soft" data-clear="PTP" aria-label="Remover arquivo PTP">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+              </button>
+            </div>
+          </div>
+
+          <div class="mt-6 flex flex-wrap items-center gap-3">
+            <button id="runBtn" class="btn btn-primary" disabled>
+              <span id="runIco"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3h5v5"/><path d="M8 21H3v-5"/><path d="M21 3 14 10"/><path d="m3 21 7-7"/></svg></span>
+              <span id="runLbl">Executar batimento</span>
+            </button>
+            <button id="resetBtn" class="btn btn-ghost">Limpar</button>
+          </div>
+
+          <div class="mt-auto pt-6">
+            <div class="inner">
+              <div class="inner-head"><span class="text-xs font-mono t-fg3">saída</span><span class="text-xs font-mono t-accent" id="outName">MMAA_e-financeira_recon.xlsx</span></div>
+              <div class="px-5 py-3 text-xs font-mono leading-6 t-muted">
+                <div><span class="t-faint mr-3">1</span>A–B&nbsp; IDs <span class="t-fg3">J (TRD)</span> · <span class="t-fg3">A (PTP)</span></div>
+                <div><span class="t-faint mr-3">2</span>C–T&nbsp; TRD · PTP · <span class="t-accent">TRD − PTP</span></div>
+                <div><span class="t-faint mr-3">3</span>U–V&nbsp; status do batimento</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- etapa 02: analise -->
+    <section id="analise" class="w-full border-b b-line">
+      <div class="px-6 md:px-8 pt-8 pb-6 flex flex-col md:flex-row md:items-end justify-between gap-6">
+        <div class="flex items-start gap-5">
+          <div class="step-tag">Etapa 02</div>
+          <div>
+            <h2 class="text-2xl font-light tracking-tight t-fg">Análise e comparações</h2>
+            <p class="mt-2 max-w-xl text-sm leading-relaxed tracking-tight t-muted" id="analiseSub">Os resultados aparecem aqui assim que os dois arquivos forem batidos.</p>
+          </div>
+        </div>
+        <button id="exportBtn" class="btn btn-primary" disabled>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V3"/><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/></svg>
+          Exportar Excel
+        </button>
+      </div>
+
+      <!-- KPIs -->
+      <div class="px-6 md:px-8 pb-6 grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-2" id="kpis">
+        <button class="kpi" data-filter="all"><div class="text-[11px] t-faint mb-3">Instrumentos analisados</div><div class="kpi-val t-fg" data-k="total">—</div><div class="text-[11px] t-faint mt-2" data-k="linhas">TRD — · PTP —</div></button>
+        <button class="kpi" data-filter="ok"><div class="text-[11px] t-faint mb-3">Match sem divergência</div><div class="kpi-val t-fg" data-k="match_ok">—</div><div class="bar"><span data-bar="match_ok" style="width:0"></span></div></button>
+        <button class="kpi" data-filter="div"><div class="text-[11px] t-faint mb-3">Match com divergência</div><div class="kpi-val t-fg" data-k="divergentes">—</div><div class="bar"><span class="bad" data-bar="divergentes" style="width:0"></span></div></button>
+        <button class="kpi" data-filter="allege_ptp"><div class="text-[11px] t-faint mb-3">Allege on PTP side</div><div class="kpi-val t-fg" data-k="allege_ptp">—</div><div class="bar"><span class="warn" data-bar="allege_ptp" style="width:0"></span></div></button>
+        <button class="kpi" data-filter="allege_trd"><div class="text-[11px] t-faint mb-3">Allege on TRD side</div><div class="kpi-val t-fg" data-k="allege_trd">—</div><div class="bar"><span class="warn" data-bar="allege_trd" style="width:0"></span></div></button>
+        <div class="kpi is-accent flex flex-col"><div class="text-[11px] t-faint mb-3">Taxa de aderência</div><div class="kpi-val t-accent" data-k="taxa">—</div><div class="text-[11px] t-faint mt-2">match sem divergência / total</div></div>
+      </div>
+
+      <div id="warnings" class="px-6 md:px-8 pb-4 hidden-soft"></div>
+
+      <!-- divergencias por campo -->
+      <div id="fieldBreak" class="px-6 md:px-8 pb-6 hidden-soft">
+        <div class="flex flex-wrap gap-2" id="fieldChips"></div>
+      </div>
+
+      <!-- toolbar + tabela -->
+      <div class="panel border-x-0 border-b-0">
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3 px-6 md:px-8 py-4">
+          <div class="seg" id="filters">
+            <button data-filter="all" class="active">Todos <span class="count" data-c="total">0</span></button>
+            <button data-filter="div">Divergências <span class="count" data-c="divergentes">0</span></button>
+            <button data-filter="allege_ptp">Allege PTP <span class="count" data-c="allege_ptp">0</span></button>
+            <button data-filter="allege_trd">Allege TRD <span class="count" data-c="allege_trd">0</span></button>
+            <button data-filter="ok">OK <span class="count" data-c="match_ok">0</span></button>
+          </div>
+          <div class="flex items-center gap-2 w-full lg:w-auto">
+            <div class="relative flex-1 lg:w-72">
+              <svg class="absolute left-3 top-1/2 -translate-y-1/2 t-faint" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+              <input id="search" type="search" class="input" placeholder="Buscar ID do instrumento..." autocomplete="off"/>
+              <span class="kbd absolute right-2.5 top-1/2 -translate-y-1/2 hidden sm:inline">/</span>
+            </div>
+            <select id="pageSize" class="input w-auto" aria-label="Linhas por página">
+              <option>25</option><option selected>50</option><option>100</option><option>250</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="table-wrap" id="tableWrap">
+          <div class="empty-state" id="emptyState">
+            <div class="mx-auto mb-4 w-12 h-12 rounded-xl flex items-center justify-center t-accent" style="background:var(--accent-soft);box-shadow:inset 0 0 0 1px var(--accent-ring)">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+            </div>
+            <div class="text-sm t-fg2">Nenhuma análise ainda</div>
+            <div class="text-xs t-faint mt-1">Importe o MMAA_TRD e o MMAA_PTP na Etapa 01.</div>
+          </div>
+          <table class="recon hidden-soft" id="reconTable">
+            <thead></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+
+        <div class="flex flex-col sm:flex-row items-center justify-between gap-3 px-6 md:px-8 py-3 border-t b-line text-xs">
+          <div class="t-faint" id="pageInfo">—</div>
+          <div class="flex items-center gap-2">
+            <button class="btn btn-ghost btn-sm" id="prevPage" disabled>Anterior</button>
+            <span class="font-mono t-muted" id="pageNum">0 / 0</span>
+            <button class="btn btn-ghost btn-sm" id="nextPage" disabled>Próxima</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- regras -->
+    <section id="regras" class="w-full border-b b-line">
+      <div class="grid md:grid-cols-3">
+        <div class="panel panel-hoverglow flashlight-target border-0 md:border-r b-line p-6 md:p-8">
+          <div class="flashlight-content">
+            <div class="text-xs font-mono tracking-widest t-accent uppercase mb-3">01 · Correspondência</div>
+            <p class="text-sm leading-relaxed t-muted">A coluna <span class="t-fg2 font-mono">J</span> do TRD (<span class="font-mono">INOA-1310004198</span>) é casada com a coluna <span class="t-fg2 font-mono">A</span> do PTP usando só o miolo numérico.</p>
+          </div>
+        </div>
+        <div class="panel panel-hoverglow flashlight-target border-0 md:border-r b-line p-6 md:p-8">
+          <div class="flashlight-content">
+            <div class="text-xs font-mono tracking-widest t-accent uppercase mb-3">02 · Allege</div>
+            <p class="text-sm leading-relaxed t-muted">Só no TRD → <span class="tag tag-warn">Allege on PTP side</span><br/>Só no PTP → <span class="tag tag-warn mt-1">Allege on TRD side</span></p>
+          </div>
+        </div>
+        <div class="panel panel-hoverglow flashlight-target border-0 p-6 md:p-8">
+          <div class="flashlight-content">
+            <div class="text-xs font-mono tracking-widest t-accent uppercase mb-3">03 · Diferenças</div>
+            <p class="text-sm leading-relaxed t-muted"><span class="font-mono t-fg2">N−B · P−C · Q−D · T−E · U−F · V−G</span>. Datas em dias; valores vazios contam como zero; códigos diferentes marcam <span class="font-mono t-danger">DIVERGENTE</span>.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="relative z-10 max-w-[1360px] mx-auto w-full px-6 py-6 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs t-faint">
+    <div class="flex items-center gap-2"><img src="{{ url_for('static', filename='img/logo.svg') }}" alt="" class="w-4 h-4"/>e-Financeira Recon</div>
+    <div>Processamento em memória · nada é gravado em disco</div>
+  </footer>
+</div>
+
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+<script src="{{ url_for('static', filename='vendor/gsap.min.js') }}"></script>
+<script src="{{ url_for('static', filename='js/flashlight.js') }}"></script>
+<script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>

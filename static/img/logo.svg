@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <!-- e-Financeira Recon: dois conjuntos (TRD e PTP) que se encontram no batimento -->
+  <rect width="64" height="64" rx="14" fill="#05080A"/>
+  <rect x="0.75" y="0.75" width="62.5" height="62.5" rx="13.25" stroke="#c6f91f" stroke-opacity="0.3" stroke-width="1"/>
+  <path d="M32 18.8a14 14 0 0 1 0 26.4a14 14 0 0 1 0-26.4z" fill="#c6f91f"/>
+  <circle cx="25" cy="32" r="14" stroke="#ffffff" stroke-opacity="0.85" stroke-width="3"/>
+  <circle cx="39" cy="32" r="14" stroke="#c6f91f" stroke-width="3"/>
+</svg>
