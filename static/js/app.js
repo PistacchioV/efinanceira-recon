@@ -170,8 +170,8 @@
     switch (state.filter) {
       case 'div': return r.valores === 'Divergente';
       case 'ok': return r.valores === 'OK';
-      case 'allege_ptp': return r.status === 'Allege on PTP side';
-      case 'allege_trd': return r.status === 'Allege on TRD side';
+      case 'allege_ptp': return r.status === 'Missing PTP';
+      case 'allege_trd': return r.status === 'Missing TRD';
       default:
         if (state.filter.indexOf('field:') === 0) return r.divs.indexOf(state.filter.slice(6)) >= 0;
         return true;
@@ -311,8 +311,8 @@
     if (col.kind === 'id') cls.push('id');
     if (col.src === 'DIF' && r.divs.indexOf(col.key) >= 0) cls.push('bad');
     else if (col.src === 'DIF' && typeof v === 'number' && v !== 0) cls.push('tol');
-    if (r.status === 'Allege on PTP side' && col.src === 'PTP') cls.push('side-missing');
-    if (r.status === 'Allege on TRD side' && col.src === 'TRD') cls.push('side-missing');
+    if (r.status === 'Missing PTP' && col.src === 'PTP') cls.push('side-missing');
+    if (r.status === 'Missing TRD' && col.src === 'TRD') cls.push('side-missing');
     if (col.src === 'TRD' && col.group > 0) cls.push('first-of-group');
     if (col.key === 'id_trd') cls.push('stick');
     return '<td class="' + cls.join(' ') + '">' + esc(txt) + '</td>';

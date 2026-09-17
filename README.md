@@ -10,8 +10,8 @@ Batimento e-Financeira entre os arquivos `MMAA_TRD` e `MMAA_PTP` (Python/Flask, 
 ## Regras
 
 - **IDs:** coluna J do TRD (`INOA-1310004198`) × coluna A do PTP, casados pelo miolo numérico.
-  - só no TRD → `Allege on PTP side`
-  - só no PTP → `Allege on TRD side`
+  - só no TRD → `Missing PTP`
+  - só no PTP → `Missing TRD`
 - **Diferenças (TRD − PTP):** N−B, P−C, Q−D, T−E, U−F, V−G. Datas em dias; vazio em coluna de valor conta como zero; códigos diferentes → `DIVERGENTE`.
 - **Tolerâncias:** diferença de data (`conta_dtencerr`) de até 3 dias não diverge e recebe a observação `Gap between fixing and maturity date` (última coluna); as demais diferenças até 0,5 não divergem.
 - **Saída:** `MMAA_e-financeira_recon.xlsx` com as colunas A–T da especificação, status em U–V, observação em W e aba `Resumo`.

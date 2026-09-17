@@ -4,8 +4,8 @@ recon.py — motor do batimento e-Financeira (TRD x PTP).
 Regras:
   * Chave: coluna J do MMAA_TRD (formato INOA-1310004198) contra a coluna A do
     MMAA_PTP. O casamento usa apenas o miolo numerico da celula.
-  * Instrumento so no TRD  -> "Allege on PTP side" (falta do lado PTP).
-    Instrumento so no PTP  -> "Allege on TRD side" (falta do lado TRD).
+  * Instrumento so no TRD  -> "Missing PTP" (falta do lado PTP).
+    Instrumento so no PTP  -> "Missing TRD" (falta do lado TRD).
   * Subtracoes (TRD - PTP): N-B, P-C, Q-D, T-E, U-F, V-G.
   * Tolerancias: data (conta_dtencerr) ate 3 dias; demais diferencas ate 0,5.
     Diferenca de data dentro da tolerancia gera a observacao
@@ -39,8 +39,8 @@ PAIRS = [
 ]
 
 STATUS_MATCH = "Match"
-STATUS_ALLEGE_PTP = "Allege on PTP side"
-STATUS_ALLEGE_TRD = "Allege on TRD side"
+STATUS_ALLEGE_PTP = "Missing PTP"
+STATUS_ALLEGE_TRD = "Missing TRD"
 VAL_OK = "OK"
 VAL_DIV = "Divergente"
 TXT_DIVERGENTE = "DIVERGENTE"
@@ -525,8 +525,8 @@ def to_excel(result):
         ("Instrumentos casados (Match)", s["match"]),
         ("  sem divergencia", s["match_ok"]),
         ("  com divergencia", s["divergentes"]),
-        ("Allege on PTP side (so no TRD)", s["allege_ptp"]),
-        ("Allege on TRD side (so no PTP)", s["allege_trd"]),
+        ("Missing PTP (so no TRD)", s["allege_ptp"]),
+        ("Missing TRD (so no PTP)", s["allege_trd"]),
         ("Gap between fixing and maturity date", s["gap_data"]),
         ("Tolerancias", "data <= %d dias; demais diferencas <= %s" % (s["tol_dias"], str(s["tol_valor"]).replace(".", ","))),
         ("", ""),

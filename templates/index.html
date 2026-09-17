@@ -178,8 +178,8 @@
         <button class="kpi" data-filter="all"><div class="text-[11px] t-faint mb-3">Instrumentos analisados</div><div class="kpi-val t-fg" data-k="total">—</div><div class="text-[11px] t-faint mt-2" data-k="linhas">TRD — · PTP —</div></button>
         <button class="kpi" data-filter="ok"><div class="text-[11px] t-faint mb-3">Match sem divergência</div><div class="kpi-val t-fg" data-k="match_ok">—</div><div class="bar"><span data-bar="match_ok" style="width:0"></span></div></button>
         <button class="kpi" data-filter="div"><div class="text-[11px] t-faint mb-3">Match com divergência</div><div class="kpi-val t-fg" data-k="divergentes">—</div><div class="bar"><span class="bad" data-bar="divergentes" style="width:0"></span></div></button>
-        <button class="kpi" data-filter="allege_ptp"><div class="text-[11px] t-faint mb-3">Allege on PTP side</div><div class="kpi-val t-fg" data-k="allege_ptp">—</div><div class="bar"><span class="warn" data-bar="allege_ptp" style="width:0"></span></div></button>
-        <button class="kpi" data-filter="allege_trd"><div class="text-[11px] t-faint mb-3">Allege on TRD side</div><div class="kpi-val t-fg" data-k="allege_trd">—</div><div class="bar"><span class="warn" data-bar="allege_trd" style="width:0"></span></div></button>
+        <button class="kpi" data-filter="allege_ptp"><div class="text-[11px] t-faint mb-3">Missing PTP</div><div class="kpi-val t-fg" data-k="allege_ptp">—</div><div class="bar"><span class="warn" data-bar="allege_ptp" style="width:0"></span></div></button>
+        <button class="kpi" data-filter="allege_trd"><div class="text-[11px] t-faint mb-3">Missing TRD</div><div class="kpi-val t-fg" data-k="allege_trd">—</div><div class="bar"><span class="warn" data-bar="allege_trd" style="width:0"></span></div></button>
         <div class="kpi is-accent flex flex-col"><div class="text-[11px] t-faint mb-3">Taxa de aderência</div><div class="kpi-val t-accent" data-k="taxa">—</div><div class="text-[11px] t-faint mt-2">match sem divergência / total</div></div>
       </div>
 
@@ -196,8 +196,8 @@
           <div class="seg" id="filters">
             <button data-filter="all" class="active">Todos <span class="count" data-c="total">0</span></button>
             <button data-filter="div">Divergências <span class="count" data-c="divergentes">0</span></button>
-            <button data-filter="allege_ptp">Allege PTP <span class="count" data-c="allege_ptp">0</span></button>
-            <button data-filter="allege_trd">Allege TRD <span class="count" data-c="allege_trd">0</span></button>
+            <button data-filter="allege_ptp">Missing PTP <span class="count" data-c="allege_ptp">0</span></button>
+            <button data-filter="allege_trd">Missing TRD <span class="count" data-c="allege_trd">0</span></button>
             <button data-filter="ok">OK <span class="count" data-c="match_ok">0</span></button>
           </div>
           <div class="flex items-center gap-2 w-full lg:w-auto">
@@ -248,8 +248,8 @@
         </div>
         <div class="panel panel-hoverglow flashlight-target border-0 md:border-r b-line p-4 md:p-5">
           <div class="flashlight-content">
-            <div class="text-xs font-mono tracking-widest t-accent uppercase mb-3">02 · Allege</div>
-            <p class="text-sm leading-relaxed t-muted">Só no TRD → <span class="tag tag-warn">Allege on PTP side</span><br/>Só no PTP → <span class="tag tag-warn mt-1">Allege on TRD side</span></p>
+            <div class="text-xs font-mono tracking-widest t-accent uppercase mb-3">02 · Missing</div>
+            <p class="text-sm leading-relaxed t-muted">Só no TRD → <span class="tag tag-warn">Missing PTP</span><br/>Só no PTP → <span class="tag tag-warn mt-1">Missing TRD</span></p>
           </div>
         </div>
         <div class="panel panel-hoverglow flashlight-target border-0 p-4 md:p-5">
