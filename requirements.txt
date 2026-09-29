@@ -1,3 +1,4 @@
 flask>=2.2
 openpyxl>=3.1
 waitress>=2.1
+pypdf>=4.0

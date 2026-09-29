@@ -1,6 +1,6 @@
 @echo off
 REM ============================================================================
-REM  e-Financeira Recon  (Windows)
+REM  EDG Tracker  (Windows)
 REM
 REM  Instala as dependencias (requirements.txt), sobe o servidor Waitress na
 REM  porta 5070 e abre  http://127.0.0.1:5070/  no navegador sozinho.
@@ -38,7 +38,7 @@ if errorlevel 1 (
 )
 
 set "BASE=%~dp0"
-title e-Financeira Recon
+title EDG Tracker
 
 echo [DICA] Se o titulo da janela comecar com "Select", o console esta em modo
 echo        de selecao e o processo fica congelado. Aperte Esc para destravar.
@@ -127,13 +127,13 @@ if /I "%~1"=="noinstall" (
     )
 )
 
-if not defined PYTHONPYCACHEPREFIX set "PYTHONPYCACHEPREFIX=%LOCALAPPDATA%\EfinRecon\pycache"
+if not defined PYTHONPYCACHEPREFIX set "PYTHONPYCACHEPREFIX=%LOCALAPPDATA%\EdgTracker\pycache"
 
 REM  abre o navegador numa janela propria, que espera o servidor responder
-start "e-Financeira Recon - navegador" /min "%~f0" --abrir
+start "EDG Tracker - navegador" /min "%~f0" --abrir
 
 echo.
-echo [e-Financeira Recon] http://127.0.0.1:%PORTA%  ^(waitress^)
+echo [EDG Tracker] http://127.0.0.1:%PORTA%  ^(waitress^)
 echo                      Feche esta janela ou Ctrl+C para parar.
 echo.
 REM  Waitress e nao gunicorn: gunicorn nao roda no Windows. Um processo so,

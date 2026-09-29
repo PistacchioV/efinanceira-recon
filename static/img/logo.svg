@@ -1,8 +1,9 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
-  <!-- e-Financeira Recon: dois conjuntos (TRD e PTP) que se encontram no batimento -->
+  <!-- EDG Tracker: trilha de acompanhamento com o ponto do ultimo evento -->
   <rect width="64" height="64" rx="14" fill="#05080A"/>
-  <rect x="0.75" y="0.75" width="62.5" height="62.5" rx="13.25" stroke="#c6f91f" stroke-opacity="0.3" stroke-width="1"/>
-  <path d="M32 18.8a14 14 0 0 1 0 26.4a14 14 0 0 1 0-26.4z" fill="#c6f91f"/>
-  <circle cx="25" cy="32" r="14" stroke="#ffffff" stroke-opacity="0.85" stroke-width="3"/>
-  <circle cx="39" cy="32" r="14" stroke="#c6f91f" stroke-width="3"/>
+  <rect x="0.75" y="0.75" width="62.5" height="62.5" rx="13.25" stroke="#c6f91f" stroke-opacity="0.35" stroke-width="1.5"/>
+  <path d="M13 48h38" stroke="#ffffff" stroke-opacity="0.22" stroke-width="2" stroke-linecap="round"/>
+  <path d="M13 41l10-10 8 6 15-16" stroke="#c6f91f" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="46" cy="21" r="8.5" stroke="#c6f91f" stroke-opacity="0.35" stroke-width="1.5"/>
+  <circle cx="46" cy="21" r="4.6" fill="#c6f91f"/>
 </svg>

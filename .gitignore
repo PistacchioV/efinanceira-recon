@@ -1,16 +1,6 @@
-# referencia do design system (template de terceiros; o app usa as copias em static/)
-assets/
-design-system.html
-STACK.md
-
-# python
 __pycache__/
 *.pyc
-.venv/
 venv/
-
-# sistema / editor
+.venv/
+data/
 .DS_Store
-Thumbs.db
-.claude/
-~$*.xlsx

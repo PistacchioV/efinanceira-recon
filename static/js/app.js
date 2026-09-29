@@ -1,4 +1,4 @@
-/* app.js — dropzone, batimento, tabela de analise, filtros, exportacao e tema */
+/* app.js — e-Financeira Recon: dropzone, batimento, tabela de analise, filtros e exportacao */
 (function () {
   'use strict';
 
@@ -17,36 +17,14 @@
   var fmtNum = new Intl.NumberFormat('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   var fmtInt = new Intl.NumberFormat('pt-BR');
 
-  // ------------------------------------------------------------------ tema
-  var root = document.documentElement;
-  var meta = document.querySelector('meta[name="theme-color"]');
-  function applyTheme(t) {
-    root.classList.remove('dark', 'light');
-    root.classList.add(t);
-    if (meta) meta.setAttribute('content', t === 'dark' ? '#05080A' : '#F3F4F0');
-    try { localStorage.setItem('efin-theme', t); } catch (e) {}
-  }
-  applyTheme(root.classList.contains('light') ? 'light' : 'dark');
-  $('#themeToggle').addEventListener('click', function () {
-    applyTheme(root.classList.contains('dark') ? 'light' : 'dark');
-  });
-
   // ------------------------------------------------------------ animacoes
   if (window.gsap) {
     gsap.set('.hero-anim-item', { opacity: 0, y: 40, filter: 'blur(12px)' });
     gsap.to('.hero-anim-item', { opacity: 1, y: 0, filter: 'blur(0px)', duration: 1.2, stagger: 0.15, ease: 'power3.out', delay: 0.1 });
   }
 
-  // ----------------------------------------------------------------- toast
-  var toastTimer;
-  function toast(msg, ok) {
-    var el = $('#toast');
-    el.textContent = msg;
-    el.classList.toggle('ok', !!ok);
-    el.classList.add('show');
-    clearTimeout(toastTimer);
-    toastTimer = setTimeout(function () { el.classList.remove('show'); }, ok ? 2800 : 6000);
-  }
+  // tema, sidebar e toast vivem no shell.js
+  var toast = window.EDG.toast;
 
   // -------------------------------------------------------------- arquivos
   var FILE_RE = /(\d{4})\s*[_\-\s]\s*(TRD|PTP)/i;
