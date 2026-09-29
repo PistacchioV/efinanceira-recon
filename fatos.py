@@ -41,7 +41,7 @@ CVM_VIEW = "https://www.rad.cvm.gov.br/ENETWEB/frmExibirArquivoIPEExterno.aspx"
 CVM_PDF = CVM_VIEW + "/ExibirPDF"
 FNET_BASE = "https://fnet.bmfbovespa.com.br/fnet/publico"
 AGENCIA = 18
-PALAVRA_PADRAO = "fato relevante"
+PALAVRA_PADRAO = "Fato Relevante"
 JANELA_MAX_DIAS = 30  # limite da propria B3
 
 UA = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36"
@@ -90,6 +90,26 @@ RE_LINK = re.compile(r"https?://[^\s<>\"]+")
 RE_PROTOCOLO = re.compile(r"[?&]ID=(\d+)", re.I)
 
 FLAGS = {"R": "Reapresentação", "C": "Documento cancelado", "N": "Norma / Notas"}
+
+
+def data_br(iso):
+    """AAAA-MM-DD -> DD/MM/AAAA (formato usado na tela)."""
+    if not iso:
+        return ""
+    partes = str(iso)[:10].split("-")
+    return "%s/%s/%s" % (partes[2], partes[1], partes[0]) if len(partes) == 3 else str(iso)
+
+
+def data_iso(valor):
+    """Aceita DD/MM/AAAA ou AAAA-MM-DD e devolve sempre AAAA-MM-DD."""
+    valor = (valor or "").strip()
+    if not valor:
+        return None
+    m = re.match(r"^(\d{2})/(\d{2})/(\d{4})$", valor)
+    if m:
+        return _iso(m.group(1), m.group(2), m.group(3))
+    m = re.match(r"^(\d{4})-(\d{2})-(\d{2})$", valor)
+    return valor if m else None
 
 
 def _iso(dia, mes, ano):
@@ -180,8 +200,8 @@ def _sem_acento(s):
 # ------------------------------------------------------------------- b3 ----
 def listar_titulos(palavra=PALAVRA_PADRAO, de=None, ate=None, agencia=AGENCIA):
     """Titulos do periodo. de/ate em AAAA-MM-DD (a B3 aceita no maximo 30 dias)."""
-    ate = ate or date.today().isoformat()
-    de = de or ate
+    ate = data_iso(ate) or date.today().isoformat()
+    de = data_iso(de) or ate
     if (date.fromisoformat(ate) - date.fromisoformat(de)).days > JANELA_MAX_DIAS:
         raise FatosError("A B3 aceita no máximo %d dias por consulta." % JANELA_MAX_DIAS)
 
@@ -442,6 +462,7 @@ def importar(palavra=PALAVRA_PADRAO, de=None, ate=None, limite=200, reimportar=F
 def listar_cards(q=None, de=None, ate=None, apenas_com_documento=False):
     """Cards do cache, do mais recente para o mais antigo, filtrados pela data de referência."""
     cards = list(carregar_index().values())
+    de, ate = data_iso(de), data_iso(ate)
 
     if de:
         cards = [c for c in cards if (c.get("data_referencia") or "") >= de]
@@ -461,6 +482,7 @@ def listar_cards(q=None, de=None, ate=None, apenas_com_documento=False):
     return cards
 
 
-def periodo_padrao(dias=7):
+def periodo_padrao(dias=1):
+    """Periodo inicial da tela: por padrao so o dia de hoje (de = ate = hoje)."""
     hoje = date.today()
     return (hoje - timedelta(days=dias - 1)).isoformat(), hoje.isoformat()

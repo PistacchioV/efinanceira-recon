@@ -51,11 +51,11 @@
             <div class="grid grid-cols-2 gap-3">
               <label class="flex flex-col gap-1.5">
                 <span class="text-[11px] t-faint uppercase tracking-widest font-mono">De</span>
-                <input id="impDe" class="input" type="date" value="{{ de }}"/>
+                <input id="impDe" class="input data-br" type="text" inputmode="numeric" maxlength="10" placeholder="dd/mm/aaaa" value="{{ de }}"/>
               </label>
               <label class="flex flex-col gap-1.5">
                 <span class="text-[11px] t-faint uppercase tracking-widest font-mono">Até</span>
-                <input id="impAte" class="input" type="date" value="{{ ate }}"/>
+                <input id="impAte" class="input data-br" type="text" inputmode="numeric" maxlength="10" placeholder="dd/mm/aaaa" value="{{ ate }}"/>
               </label>
             </div>
           </div>
@@ -125,11 +125,11 @@
             </div>
             <label class="flex items-center gap-2 text-xs t-faint">
               ref. de
-              <input id="refDe" type="date" class="input w-auto"/>
+              <input id="refDe" type="text" class="input data-br w-32" inputmode="numeric" maxlength="10" placeholder="dd/mm/aaaa"/>
             </label>
             <label class="flex items-center gap-2 text-xs t-faint">
               até
-              <input id="refAte" type="date" class="input w-auto"/>
+              <input id="refAte" type="text" class="input data-br w-32" inputmode="numeric" maxlength="10" placeholder="dd/mm/aaaa"/>
             </label>
             <button id="limparFiltros" class="btn btn-ghost btn-sm">Limpar filtros</button>
           </div>

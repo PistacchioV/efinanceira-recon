@@ -102,8 +102,9 @@ def _job_snapshot():
 
 @app.route("/fatos")
 def pagina_fatos():
-    de, ate = fatos.periodo_padrao(7)
-    return render_template("fatos.html", pagina="fatos", de=de, ate=ate,
+    de, ate = fatos.periodo_padrao()
+    return render_template("fatos.html", pagina="fatos",
+                           de=fatos.data_br(de), ate=fatos.data_br(ate),
                            palavra=fatos.PALAVRA_PADRAO)
 
 

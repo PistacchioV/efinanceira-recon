@@ -32,6 +32,30 @@
     return dataBR(p[0]) + (p[1] ? ' ' + p[1].slice(0, 5) : '');
   }
 
+  // os campos de data sao texto com mascara: o seletor nativo mostraria o
+  // formato do idioma do navegador (mm/dd/aaaa em maquina em ingles)
+  function paraIso(v) {
+    var m = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(String(v || '').trim());
+    if (!m) return '';
+    var d = new Date(+m[3], +m[2] - 1, +m[1]);
+    if (d.getDate() !== +m[1] || d.getMonth() !== +m[2] - 1) return '';
+    return m[3] + '-' + m[2] + '-' + m[1];
+  }
+
+  function mascaraData(el) {
+    el.addEventListener('input', function () {
+      var d = el.value.replace(/\D/g, '').slice(0, 8);
+      var out = d.slice(0, 2);
+      if (d.length > 2) out += '/' + d.slice(2, 4);
+      if (d.length > 4) out += '/' + d.slice(4, 8);
+      el.value = out;
+    });
+    el.addEventListener('blur', function () {
+      el.classList.toggle('is-invalid', !!el.value && !paraIso(el.value));
+    });
+  }
+  $$('.data-br').forEach(mascaraData);
+
   // ------------------------------------------------------------ importacao
   function setImportando(on) {
     $('#impBtn').disabled = on;
@@ -78,11 +102,11 @@
   function importar() {
     var corpo = {
       palavra: $('#impPalavra').value.trim(),
-      de: $('#impDe').value,
-      ate: $('#impAte').value,
+      de: paraIso($('#impDe').value),
+      ate: paraIso($('#impAte').value),
       reimportar: $('#impRefazer').checked
     };
-    if (!corpo.de || !corpo.ate) { toast('Informe o período (de e até).'); return; }
+    if (!corpo.de || !corpo.ate) { toast('Informe o período no formato dd/mm/aaaa.'); return; }
     if (corpo.de > corpo.ate) { toast('A data inicial não pode ser maior que a final.'); return; }
 
     setImportando(true);
@@ -203,8 +227,8 @@
     var p = new URLSearchParams();
     var q = $('#busca').value.trim();
     if (q) p.set('q', q);
-    if ($('#refDe').value) p.set('de', $('#refDe').value);
-    if ($('#refAte').value) p.set('ate', $('#refAte').value);
+    if (paraIso($('#refDe').value)) p.set('de', paraIso($('#refDe').value));
+    if (paraIso($('#refAte').value)) p.set('ate', paraIso($('#refAte').value));
     if (state.doc === '1') p.set('com_documento', '1');
 
     fetch('/api/fatos?' + p.toString()).then(function (r) { return r.json(); }).then(function (j) {
@@ -224,10 +248,11 @@
   // ------------------------------------------------------------------ liga
   $('#impBtn').addEventListener('click', importar);
   $('#busca').addEventListener('input', agendarCarga);
-  $('#refDe').addEventListener('change', carregar);
-  $('#refAte').addEventListener('change', carregar);
+  $('#refDe').addEventListener('input', agendarCarga);
+  $('#refAte').addEventListener('input', agendarCarga);
   $('#limparFiltros').addEventListener('click', function () {
     $('#busca').value = ''; $('#refDe').value = ''; $('#refAte').value = '';
+    $$('.data-br').forEach(function (el) { el.classList.remove('is-invalid'); });
     state.doc = '0';
     $$('#segDoc button').forEach(function (b) { b.classList.toggle('active', b.getAttribute('data-doc') === '0'); });
     carregar();
